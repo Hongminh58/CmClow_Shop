@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CM CLOW - Góc nhỏ dịu mát & quà tặng xinh</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--theme-bg, #FAF7F2);
+            color: #4A4E69;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        :root {
+            --theme-primary: #FFB5A7;
+            --theme-primary-hover: #F8AD9D;
+            --theme-primary-light: #FCD5CE;
+            --theme-primary-text: #6B4E48;
+            --theme-accent: #F9F1F0;
+            --theme-bg: #FAF7F2;
+        }
+
+        .bg-theme-primary { background-color: var(--theme-primary) !important; }
+        .bg-theme-primary-hover:hover { background-color: var(--theme-primary-hover) !important; }
+        .bg-theme-light { background-color: var(--theme-primary-light) !important; }
+        .text-theme-primary { color: var(--theme-primary-text) !important; }
+        .border-theme-primary { border-color: var(--theme-primary) !important; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #F0EAE1; }
+        ::-webkit-scrollbar-thumb { background: #D8C8B8; border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: #C4B09E; }
+
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-rose-200">
+
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-stone-200/60 shadow-sm transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            
+            <!-- Logo & Store Info -->
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="onLogoClick()">
+                <div id="shopLogoContainer" class="w-12 h-12 rounded-2xl bg-theme-light flex items-center justify-center overflow-hidden shadow-inner border border-stone-200/50 transition transform group-hover:scale-105">
+                    <img id="shopLogoImg" src="" alt="Logo" class="w-full h-full object-cover hidden">
+                    <i id="shopLogoFallback" data-lucide="store" class="w-6 h-6 text-stone-600"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl sm:text-2xl tracking-tight text-stone-800 flex items-center gap-2" id="headerStoreName">
+                        CM CLOW
+                    </h1>
+                    <p class="text-xs text-stone-500 font-medium" id="headerStoreTagline">Không có ý tưởng nào quá nhỏ để trở thành điều tuyệt vời !</p>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center gap-3">
+                <!-- Search Input Desktop -->
+                <div class="relative hidden md:block w-60 lg:w-72">
+                    <input type="text" id="headerSearchInput" placeholder="Tìm sản phẩm xinh..." 
+                           class="w-full pl-9 pr-4 py-2 text-sm bg-stone-100/80 border border-transparent rounded-full focus:bg-white focus:border-stone-300 focus:outline-none transition shadow-inner">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-stone-400"></i>
+                </div>
+
+                <!-- Admin Status Badge -->
+                <div id="adminBadge" class="hidden items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold border border-emerald-200">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Chủ Shop</span>
+                </div>
+
+                <!-- Logout Button -->
+                <button id="logoutAdminBtn" onclick="logoutAdmin()" class="hidden p-2.5 rounded-full bg-rose-100 hover:bg-rose-200 text-rose-700 transition shadow-sm" title="Thoát quyền Chủ Shop">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+        <!-- Brand Story Section -->
+        <section id="brandStorySection" class="relative bg-white/80 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-stone-200/80 shadow-sm overflow-hidden">
+            <button id="editStoryBtn" onclick="openStoryModal()" class="hidden absolute top-4 right-4 px-3.5 py-1.5 bg-stone-800 text-white text-xs font-bold rounded-xl shadow-sm hover:bg-stone-700 transition flex items-center gap-1.5 z-10">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Chỉnh sửa góc này
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center">
+                <div class="md:col-span-5 h-56 sm:h-64 rounded-2xl overflow-hidden bg-stone-100 border border-stone-200/60 shadow-sm relative group">
+                    <img id="storyImg" src="" alt="Brand Story" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                </div>
+
+                <div class="md:col-span-7 space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-theme-light text-theme-primary text-xs font-extrabold uppercase tracking-wider">
+                        <i data-lucide="heart" class="w-3.5 h-3.5 fill-current"></i> Câu Chuyện Thương Hiệu
+                    </div>
+                    <h2 id="storyTitle" class="text-2xl sm:text-3xl font-extrabold text-stone-800 tracking-tight">Gửi Gắm Yêu Thương Vào Từng Sản Phẩm</h2>
+                    <p id="storyContent" class="text-stone-600 text-sm sm:text-base leading-relaxed">
+                        Chào mừng bạn ghé thăm tiệm nhỏ của chúng mình!
+                    </p>
+
+                    <!-- Contact & Social Media Badges -->
+                    <div class="pt-3 flex flex-wrap gap-2.5 text-xs font-bold text-stone-700">
+                        <a id="instagramLinkBadge" href="#" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-amber-500/10 text-pink-700 border border-pink-200 hover:scale-105 transition">
+                            <i data-lucide="instagram" class="w-4 h-4 text-pink-600"></i> Instagram
+                        </a>
+                        <a id="threadsLinkBadge" href="#" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-stone-100 text-stone-800 border border-stone-200 hover:scale-105 transition">
+                            <i data-lucide="at-sign" class="w-4 h-4 text-stone-800"></i> Threads
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="customerView" class="space-y-6">
+            
+            <!-- Admin Control Bar -->
+            <div id="adminControlBar" class="hidden p-4 rounded-3xl bg-stone-900 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-xl border border-stone-800">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 rounded-2xl bg-amber-400/20 text-amber-300">
+                        <i data-lucide="settings-2" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm">Bảng Điều Khiển Chủ Shop (Đang Bật)</h3>
+                        <p class="text-xs text-stone-400">Bạn có thể sửa tên shop, màu sắc sự kiện, Instagram, Threads, thêm/sửa sản phẩm</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <button onclick="openBackupModal()" class="flex-1 sm:flex-none px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1.5 shadow-md">
+                        <i data-lucide="copy" class="w-4 h-4"></i> Sao Chép Mã / Sao Lưu
+                    </button>
+                    <button onclick="openSettingsModal()" class="flex-1 sm:flex-none px-3.5 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-stone-700">
+                        <i data-lucide="sliders" class="w-4 h-4"></i> Cài Đặt Tất Cả
+                    </button>
+                    <button onclick="openProductModal()" class="flex-1 sm:flex-none px-4 py-2 bg-theme-primary text-white rounded-xl text-xs font-extrabold shadow-md hover:opacity-90 transition flex items-center justify-center gap-1.5">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Thêm Sản Phẩm Mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-stone-200/80 shadow-sm">
+                <div class="relative w-full sm:hidden">
+                    <input type="text" id="mobileSearchInput" placeholder="Tìm sản phẩm xinh..." 
+                           class="w-full pl-9 pr-4 py-2 text-sm bg-stone-100/80 border border-stone-200 rounded-full focus:outline-none">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-stone-400"></i>
+                </div>
+
+                <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-none" id="categoryFilterContainer"></div>
+
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <span class="text-xs text-stone-500 whitespace-nowrap font-medium">Sắp xếp:</span>
+                    <select id="sortSelect" onchange="renderProducts()" class="bg-stone-100 border border-stone-200 text-stone-700 text-xs rounded-xl px-3 py-2 focus:outline-none font-semibold">
+                        <option value="default">Mới nhất</option>
+                        <option value="price-asc">Giá: Thấp đến Cao</option>
+                        <option value="price-desc">Giá: Cao đến Thấp</option>
+                        <option value="name-asc">Tên: A - Z</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center bg-white/60 rounded-3xl border border-dashed border-stone-300">
+                <div class="w-16 h-16 bg-stone-100 text-stone-400 rounded-full flex items-center justify-center mb-3">
+                    <i data-lucide="sparkles" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-base font-bold text-stone-700">Chưa có sản phẩm phù hợp</h3>
+                <p class="text-xs text-stone-500 max-w-xs mt-1">Thử đổi từ khóa hoặc mở Chế độ Chủ shop để thêm sản phẩm mới nhé.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: Auth -->
+    <div id="authModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-xs w-full p-6 shadow-2xl border border-stone-100 text-center">
+            <div class="w-12 h-12 bg-stone-100 text-stone-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <i data-lucide="lock" class="w-6 h-6"></i>
+            </div>
+
+            <form id="authForm" onsubmit="submitAdminAuth(event)" class="space-y-4">
+                <div>
+                    <input type="password" id="adminPasswordInput" placeholder="••••" required 
+                           class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-center text-xl font-mono tracking-widest focus:outline-none focus:border-stone-400">
+                </div>
+                <div class="flex gap-2 pt-1">
+                    <button type="button" onclick="closeAuthModal()" class="w-1/2 py-2.5 text-stone-500 bg-stone-100 hover:bg-stone-200 font-bold text-xs rounded-xl transition">✕</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-stone-800 hover:bg-stone-900 text-white font-bold text-xs rounded-xl transition shadow-md">✓</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Backup & Restore -->
+    <div id="backupModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-100 my-8">
+            <div class="flex justify-between items-center pb-3 border-b border-stone-100">
+                <div class="flex items-center gap-2">
+                    <div class="p-2 rounded-xl bg-indigo-100 text-indigo-600">
+                        <i data-lucide="database" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-stone-800">Sao Lưu & Khôi Phục Dữ Liệu</h3>
+                        <p class="text-[11px] text-stone-500">Sao chép mã để chuyển shop sang thiết bị khác</p>
+                    </div>
+                </div>
+                <button onclick="closeBackupModal()" class="text-stone-400 hover:text-stone-600 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-6">
+                <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200/80 space-y-3">
+                    <h4 class="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                        <i data-lucide="copy" class="w-4 h-4 text-indigo-600"></i> 1. Sao chép Mã Dữ Liệu Cửa Hàng
+                    </h4>
+                    <p class="text-[11px] text-stone-500 leading-relaxed">
+                        Sao chép toàn bộ dữ liệu (Sản phẩm, Instagram, Threads, Tên link shop, Màu sắc) thành đoạn mã ngắn.
+                    </p>
+                    <div class="flex gap-2">
+                        <button onclick="copyBackupCode()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                            <i data-lucide="clipboard-copy" class="w-4 h-4"></i> Sao Chép Mã Sao Lưu
+                        </button>
+                        <button onclick="downloadJsonBackup()" class="px-3.5 py-2.5 bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold text-xs rounded-xl transition flex items-center gap-1.5">
+                            <i data-lucide="download" class="w-4 h-4"></i> Tải JSON
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200/80 space-y-3">
+                    <h4 class="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4 text-emerald-600"></i> 2. Khôi Phục Dữ Liệu
+                    </h4>
+                    <textarea id="restoreCodeInput" rows="3" placeholder="Dán mã sao lưu vào đây..." 
+                              class="w-full p-3 text-xs font-mono bg-white border border-stone-200 rounded-xl focus:outline-none"></textarea>
+                    
+                    <div class="flex justify-between items-center gap-2 pt-1">
+                        <label class="cursor-pointer text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1">
+                            <i data-lucide="upload" class="w-3.5 h-3.5"></i> Chọn file JSON
+                            <input type="file" accept=".json" onchange="uploadJsonBackup(event)" class="hidden">
+                        </label>
+                        <button onclick="restoreFromCode()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i> Khôi Phục Ngay
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 flex justify-end">
+                <button type="button" onclick="closeBackupModal()" class="px-4 py-2 text-stone-600 bg-stone-100 hover:bg-stone-200 font-bold text-xs rounded-xl">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Product Add/Edit -->
+    <div id="productModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-100 my-8">
+            <div class="flex justify-between items-center pb-3 border-b border-stone-100">
+                <h3 class="text-base font-bold text-stone-800" id="productModalTitle">Thêm Sản Phẩm Mới</h3>
+                <button onclick="closeProductModal()" class="text-stone-400 hover:text-stone-600 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="productForm" onsubmit="saveProduct(event)" class="mt-4 space-y-4">
+                <input type="hidden" id="productId">
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">Tên sản phẩm *</label>
+                    <input type="text" id="prodName" required placeholder="Ví dụ: Áo Sơ Mi Pastel Vintage" 
+                           class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 mb-1">Mã / Đường dẫn ngắn sản phẩm *</label>
+                        <div class="flex items-center gap-1 bg-stone-50 border border-stone-200 rounded-xl px-2.5 py-1.5">
+                            <span class="text-[10px] text-stone-400 font-mono" id="shortLinkDomainPrefix">CmClow.com/</span>
+                            <input type="text" id="prodSlug" required placeholder="sp-01" 
+                                   class="w-full text-xs font-bold font-mono bg-transparent focus:outline-none text-stone-800">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 mb-1">Danh mục *</label>
+                        <input type="text" id="prodCategory" required placeholder="Thời trang, Quà tặng..." list="categorySuggestions"
+                               class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none">
+                        <datalist id="categorySuggestions"></datalist>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 mb-1">Giá bán (VNĐ) *</label>
+                        <input type="number" id="prodPrice" required min="0" placeholder="185000" 
+                               class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 mb-1">Giá gốc (nếu có giảm giá)</label>
+                        <input type="number" id="prodOriginalPrice" min="0" placeholder="250000" 
+                               class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">Hình ảnh sản phẩm</label>
+                    <div class="flex items-center gap-2 mb-2">
+                        <button type="button" id="imgTabUrlBtn" onclick="switchImageTab('url')" class="px-3 py-1 text-xs rounded-lg bg-stone-200 text-stone-800 font-bold">Link Ảnh (URL)</button>
+                        <button type="button" id="imgTabFileBtn" onclick="switchImageTab('file')" class="px-3 py-1 text-xs rounded-lg bg-stone-100 text-stone-600 font-bold">Tải Ảnh Từ Máy</button>
+                    </div>
+
+                    <div id="imgUrlBox">
+                        <input type="url" id="prodImgUrl" placeholder="https://..." oninput="updateImagePreview(this.value)"
+                               class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none">
+                    </div>
+
+                    <div id="imgFileBox" class="hidden">
+                        <input type="file" id="prodImgFile" accept="image/*" onchange="handleFileUpload(event, 'prod')"
+                               class="w-full text-xs text-stone-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-stone-100">
+                    </div>
+
+                    <div class="mt-2 flex items-center gap-3 p-2 bg-stone-50 rounded-xl border border-stone-200">
+                        <div class="w-12 h-12 bg-stone-200 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-stone-400">
+                            <img id="imgPreview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                            <i id="imgPlaceholderIcon" data-lucide="image" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-xs text-stone-500">Xem trước ảnh sản phẩm</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">Mô tả sản phẩm</label>
+                    <textarea id="prodDescription" rows="3" placeholder="Chất liệu, màu sắc, hướng dẫn bảo quản..." 
+                              class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-stone-100">
+                    <button type="button" onclick="closeProductModal()" class="px-4 py-2 text-stone-600 bg-stone-100 font-bold text-xs rounded-xl">Hủy</button>
+                    <button type="submit" class="px-5 py-2 bg-theme-primary text-white font-bold text-xs rounded-xl shadow-md">Lưu Sản Phẩm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Detail View -->
+    <div id="detailModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-stone-100 relative my-8">
+            <button onclick="closeDetailModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600 p-1.5 rounded-full bg-stone-100 transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-2">
+                <div class="aspect-square rounded-2xl bg-stone-100 overflow-hidden border border-stone-200 flex items-center justify-center">
+                    <img id="detailImg" src="" alt="" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span id="detailCategory" class="inline-block px-3 py-1 rounded-full bg-stone-100 text-stone-600 text-[11px] font-bold">Danh mục</span>
+                        </div>
+                        <h3 id="detailTitle" class="text-xl font-extrabold text-stone-800 leading-tight">Tên sản phẩm</h3>
+                        
+                        <div class="mt-2 flex items-baseline gap-2">
+                            <p id="detailPrice" class="text-2xl font-black text-theme-primary">0 đ</p>
+                            <p id="detailOriginalPrice" class="text-xs text-stone-400 line-through font-semibold hidden"></p>
+                        </div>
+                        
+                        <div class="mt-3 pt-3 border-t border-stone-100">
+                            <h4 class="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-1">Mô tả chi tiết</h4>
+                            <p id="detailDesc" class="text-xs text-stone-600 leading-relaxed max-h-32 overflow-y-auto pr-1">Mô tả sản phẩm...</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-3 border-t border-stone-100 space-y-2">
+                        <p class="text-[11px] text-stone-500 font-bold text-center">Liên hệ mua / tư vấn qua:</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="openSocialLink('instagram')" class="py-2.5 bg-gradient-to-r from-purple-500 via-pink-500 to-amber-500 hover:opacity-90 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5">
+                                <i data-lucide="instagram" class="w-4 h-4"></i> Instagram
+                            </button>
+                            <button onclick="openSocialLink('threads')" class="py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5">
+                                <i data-lucide="at-sign" class="w-4 h-4"></i> Threads
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: Brand Story Modal -->
+    <div id="storyModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-100">
+            <div class="flex justify-between items-center pb-3 border-b border-stone-100">
+                <h3 class="text-base font-bold text-stone-800">Sửa Góc Câu Chuyện Thương Hiệu</h3>
+                <button onclick="closeStoryModal()" class="text-stone-400 hover:text-stone-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="saveStory(event)" class="mt-4 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">Tiêu đề câu chuyện</label>
+                    <input type="text" id="editStoryTitle" required 
+                           class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">Nội dung giới thiệu</label>
+                    <textarea id="editStoryContent" rows="4" required 
+                              class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">Hình ảnh câu chuyện (URL hoặc Tải lên)</label>
+                    <input type="text" id="editStoryImgUrl" placeholder="Link ảnh..." 
+                           class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none mb-2">
+                    <input type="file" accept="image/*" onchange="handleFileUpload(event, 'story')" 
+                           class="w-full text-xs text-stone-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-stone-100">
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-stone-100">
+                    <button type="button" onclick="closeStoryModal()" class="px-4 py-2 text-stone-600 bg-stone-100 font-bold text-xs rounded-xl">Hủy</button>
+                    <button type="submit" class="px-5 py-2 bg-theme-primary text-white font-bold text-xs rounded-xl shadow-md">Lưu Thay Đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 6: All Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-100 my-6">
+            <div class="flex justify-between items-center pb-3 border-b border-stone-100">
+                <h3 class="text-base font-bold text-stone-800">Cài Đặt Toàn Bộ Cửa Hàng</h3>
+                <button onclick="closeSettingsModal()" class="text-stone-400 hover:text-stone-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="saveSettings(event)" class="mt-4 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">Tên Cửa Hàng / Thương Hiệu</label>
+                    <input type="text" id="settingsStoreName" required 
+                           class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">Khẩu hiệu / Dòng mô tả phụ Header</label>
+                    <input type="text" id="settingsStoreTagline" required 
+                           class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">Tên Domain / Đường dẫn ngắn hiển thị (VD: CmClow.com)</label>
+                    <input type="text" id="settingsStoreDomain" required placeholder="CmClow.com"
+                           class="w-full px-3.5 py-2 text-xs font-mono bg-stone-50 border border-stone-200 rounded-xl focus:outline-none">
+                </div>
+
+                <!-- Instagram & Threads Links -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-stone-50 rounded-2xl border border-stone-200">
+                    <div>
+                        <label class="block text-xs font-bold text-pink-700 mb-1 flex items-center gap-1">
+                            <i data-lucide="instagram" class="w-3.5 h-3.5"></i> Link Instagram
+                        </label>
+                        <input type="url" id="settingsInstagramUrl" placeholder="https://instagram.com/your_shop" 
+                               class="w-full px-3.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-800 mb-1 flex items-center gap-1">
+                            <i data-lucide="at-sign" class="w-3.5 h-3.5"></i> Link Threads
+                        </label>
+                        <input type="url" id="settingsThreadsUrl" placeholder="https://threads.net/@your_shop" 
+                               class="w-full px-3.5 py-1.5 text-xs bg-white border border-stone-200 rounded-xl focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Logo Upload -->
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">Logo Cửa Hàng</label>
+                    <input type="text" id="settingsLogoUrl" placeholder="Link logo (URL)..." 
+                           class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none mb-2">
+                    <input type="file" accept="image/*" onchange="handleFileUpload(event, 'logo')" 
+                           class="w-full text-xs text-stone-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-stone-100">
+                </div>
+
+                <!-- Multi-Theme Selector: Tông Pastel & Các Sự Kiện Trong Năm -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-xs font-bold text-stone-700">Bộ Bảng Màu Đang Dùng</label>
+                        <span id="activeThemeBadgeName" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-600">
+                            Xanh Mint
+                        </span>
+                    </div>
+
+                    <!-- Pastel Colors -->
+                    <div class="mb-3">
+                        <span class="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1.5">Tông Màu Pastel Cơ Bản</span>
+                        <div class="grid grid-cols-5 gap-2" id="pastelThemePickerContainer"></div>
+                    </div>
+
+                    <!-- Seasonal & Event Colors -->
+                    <div>
+                        <span class="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1.5">Sự Kiện & Mùa Trong Năm</span>
+                        <div class="grid grid-cols-3 gap-2" id="eventThemePickerContainer"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-700 mb-1">Đổi Mật Khẩu Chủ Shop</label>
+                    <input type="password" id="settingsPassword" placeholder="Nhập mật khẩu mới (để trống nếu không đổi)" 
+                           class="w-full px-3.5 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-stone-100">
+                    <button type="button" onclick="closeSettingsModal()" class="px-4 py-2 text-stone-600 bg-stone-100 font-bold text-xs rounded-xl">Hủy</button>
+                    <button type="submit" class="px-5 py-2 bg-theme-primary text-white font-bold text-xs rounded-xl shadow-md">Lưu Cài Đặt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Danh sách 14 Bộ Tông Màu (5 Pastel Cơ Bản + 9 Sự Kiện Trong Năm)
+        const ALL_THEMES = {
+            peach: { group: 'pastel', name: 'Hồng Cam', icon: 'heart', primary: '#FFC0B4', hover: '#F8AD9D', light: '#FCD5CE', text: '#7A433A', bg: '#FAF7F2', colorCode: '#FFC0B4' },
+            mint: { group: 'pastel', name: 'Xanh Mint', icon: 'sparkles', primary: '#B4E3DE', hover: '#9CD4CE', light: '#E1F5F2', text: '#2B5859', bg: '#F4F9F8', colorCode: '#B4E3DE' },
+            lavender: { group: 'pastel', name: 'Tím Nhạt', icon: 'flower-2', primary: '#DDD0E8', hover: '#CCAED8', light: '#F3ECF8', text: '#523A60', bg: '#FAF7FC', colorCode: '#DDD0E8' },
+            butter: { group: 'pastel', name: 'Vàng Be', icon: 'sun', primary: '#F5EBA9', hover: '#E5D98B', light: '#FFFBE6', text: '#685D1E', bg: '#FCFAF2', colorCode: '#F5EBA9' },
+            sky: { group: 'pastel', name: 'Xanh Nhạt', icon: 'cloud', primary: '#C9E5EB', hover: '#AECFD6', light: '#E8F5F8', text: '#2C5364', bg: '#F5FAFC', colorCode: '#C9E5EB' },
+
+            tet: { group: 'event', name: 'Tết Nguyên Đán', icon: 'gift', primary: '#E63946', hover: '#D62828', light: '#FFDDD2', text: '#800F2F', bg: '#FFF8F6', colorCode: '#E63946' },
+            valentine: { group: 'event', name: 'Valentine 14/2', icon: 'heart-handshake', primary: '#FF4D6D', hover: '#C77DFF', light: '#FFCCD5', text: '#590D22', bg: '#FFF0F3', colorCode: '#FF4D6D' },
+            women_day: { group: 'event', name: 'Ngày Phụ Nữ 8/3 - 20/10', icon: 'smile', primary: '#F72585', hover: '#B5179E', light: '#FFD6FF', text: '#4CC9F0', bg: '#FDF0F7', colorCode: '#F72585' },
+            spring: { group: 'event', name: 'Mùa Xuân Tươi Mới', icon: 'sprout', primary: '#A7C957', hover: '#6A994E', light: '#E9F5DB', text: '#386641', bg: '#F7FCF5', colorCode: '#A7C957' },
+            summer: { group: 'event', name: 'Mùa Hè Rực Rỡ', icon: 'sun-medium', primary: '#FFB703', hover: '#FB8500', light: '#FFE6A7', text: '#023047', bg: '#FFFDF5', colorCode: '#FFB703' },
+            mid_autumn: { group: 'event', name: 'Tết Trung Thu', icon: 'moon', primary: '#FB5607', hover: '#FF006E', light: '#FFD000', text: '#3A86FF', bg: '#FFFDF2', colorCode: '#FB5607' },
+            autumn: { group: 'event', name: 'Mùa Thu Lãng Mạn', icon: 'leaf', primary: '#D4A373', hover: '#CCD5AE', light: '#FAEDCD', text: '#333D29', bg: '#FEFAE0', colorCode: '#D4A373' },
+            halloween: { group: 'event', name: 'Halloween 31/10', icon: 'ghost', primary: '#FF7518', hover: '#9B51E0', light: '#FFE5D9', text: '#212121', bg: '#FAF8F5', colorCode: '#FF7518' },
+            christmas: { group: 'event', name: 'Giáng Sinh & Năm Mới', icon: 'snowflake', primary: '#2A9D8F', hover: '#E76F51', light: '#E9F5F3', text: '#264653', bg: '#F4FAF8', colorCode: '#2A9D8F' }
+        };
+
+        const INTEGRATED_BACKUP_DATA = {
+            "version": "2.0",
+            "timestamp": "2026-09-29T07:23:12.594Z",
+            "storeName": "CM CLOW",
+            "storeTagline": "Không có ý tưởng nào quá nhỏ để trở thành điều tuyệt vời !",
+            "storeDomain": "CmClow.com",
+            "instagramUrl": "https://www.instagram.com/cmclow.infor?stkn=ZWo4Z2JqdDA2MTI0",
+            "threadsUrl": "https://www.threads.com/@cmclow.infor",
+            "storeLogo": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAAAIYanhsIARAAABtbnRyUkdCIFhZWiAH4wAMAAEAAAAAAABhY3NwQVBQTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLWp4bCACufkBQHM6b/D/A/Tw9worAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAtkZXNjAAABCAAAAERjcHJ0AAABTAAAACR3dHB0AAABcAAAABRjaGFkAAABhAAAACxjaWNwAAABsAAAAAxyWFlaAAABvAAAABRnWFlaAAAB0AAAABRiWFlaAAAB5AAAABRyVFJDAAAB+AAAACBnVFJDAAAB+AAAACBiVFJDAAAB+AAAACBtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACYAAAAcAFIARwBCAF8ARAA2ADUAXwBTAFIARwBfAFIAZQBsAF8AUwBSAEcAAG1sdWMAAAAAAAAAAQAAAAxlblVTAAAABgAAABwAQwBDADAAAFhZWiAAAAAAAAD21gABAAAAANMtc2YzMgAAAAAAAQxAAAAF3f//8yoAAAeSAAD9kP//+6P///2jAAAD2wAAwIFjaWNwAAAAAAENAAFYWVogAAAAAAAAb58AADj1AAADkFhZWiAAAAAAAABilgAAt4cAABjbWFlaIAAAAAAAACSiAAAPhQAAttZwYXJhAAAAAAADAAAAAmZmAADypwAADVkAABPQAAAKW//bAEMAAgEBAQEBAgEBAQICAgICBAMCAgICBQQEAwQGBQYGBgUGBgYHCQgGBwkHBgYICwgJCgoKCgoGCAsMCwoMCQoKCv/bAEMBAgICAgICBQMDBQoHBgcKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCv/AABEIBaAFoAMBEQACEQEDEQH/xAAdAAEBAAIDAQEBAAAAAAAAAAAAAwgJBAYHBQIB/8QAcRABAAECAwMEBURSEMENTS0UP337X2PznQ9pUMTMatUd/6PC7ks/DDEN0F4UUUAVhQ5l6mULLZYMifOnyOFb48ftlaohMxgRzKn42x7cw3PrFu6WLxdzTjHr5snx+vr4epPY9hyK/v5z9XEf/AG6RQ0GnoaeZZCvHvYJiYKKJpiigAmADODYDGDQCgAAAM4NAAAM4Jg0CagomCgAAAAAAmCgAAACYKAmCgAAAmACgACYmoKJgzg0AoAACaaaiiiYJgoACgAmCiYKAAAmACgJgCaYNAomAJpgoCgommKKAACYAAmoKJgoAACaYooAmCiYmoKJgoCYmoKJgAoAAODerfb75b61knwsJEevhwpFB/a/qT02HOwoy9HEtbm+dufTN3S9eOnJEHpGUp8jsf/VtT1vt/YfSuv0V55n2n1cxsqyK54Y9w+GomOOJu3aHa4Zn0B1Boah5X7x6IW/vcyn4N8u8r/M4mH0Kuxit7S2p6I6wZK1v08g6iZHncaDOoc/slKp82nt/Z7LimdhTW6p0zDqmDne3xzDubM2AAAAAAAAAAAAAAAAmKM4m0AoAAAAAAAAAAAAAAmCgAAAAAAAAAAAAAAAAAAAAAmCjE7lB983DS+y46QadTsPHJPj9nyMMfQ6l+m9dt6j0Z+udU+ny/LWU1G3fJ3d4/O4mG24eA3Gz/4m/4f19S2f7f9/n8A/0187f583t/A+/tC3q93n53vN9N4f19f1w+252x6Z/a2/vA6N/a/qG4S3m56A5u03d3/5Nvep3b/m5N8X3v+f0A03z3j9d6P8An2b3/P8A3n0+x2L4r2+fA4+m/j+e/D26fM43d3+f0+x6x/vA4/9/X0/6Af+440/e9v53X4fU3a8d462f/Nf+e27/AJp/vA8d3e/A49vf19fA4+m/7f19/f8An8/+/eA//9k=",
+            "adminPassword": "1234",
+            "currentThemeKey": "mint",
+            "brandStory": {
+                "title": "Gửi Gắm Yêu Thương Vào Từng Sản Phẩm",
+                "content": "Chào mừng bạn ghé thăm tiệm nhỏ của chúng mình! Tại đây mọi sản phẩm đều được tuyển chọn cẩn thận nhất.",
+                "image": "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80"
+            },
+            "products": [
+                { "id": "p_101", "slug": "sp-101", "name": "Lót Ly 3D Đất Sét Hoàng Hôn Pastel", "category": "Lót Ly 3D", "price": 85000, "originalPrice": 110000, "image": "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=600&q=80", "description": "Lót ly tạo hình 3D sóng nước phong cách hoàng hôn pastel thơ mộng." },
+                { "id": "p_102", "slug": "sp-102", "name": "Áo Sơ Mi Form Rộng Tông Mùa Thu", "category": "Thời Trang", "price": 220000, "originalPrice": 280000, "image": "https://images.unsplash.com/photo-1598554747436-c9293d6a588f?auto=format&fit=crop&w=600&q=80", "description": "Áo sơ mi vải linen thoáng mát, tông màu pastel nhã nhặn." },
+                { "id": "p_103", "slug": "sp-103", "name": "Nến Thơm Handmade Mùi Gỗ Aromatic", "category": "Quà Tặng", "price": 145000, "originalPrice": 180000, "image": "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=600&q=80", "description": "Nến thơm từ sáp đậu nành tự nhiên, tinh dầu vani và gỗ thông." },
+                { "id": "p_104", "slug": "sp-104", "name": "Cốc Sứ Họa Tiết Hoa Cúc Handmade", "category": "Gia Dụng", "price": 120000, "originalPrice": 150000, "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80", "description": "Cốc sứ tráng men cao cấp vẽ hoa cúc hoa văn pastel vintage." },
+                { "id": "p_105", "slug": "sp-105", "name": "Sổ Tay Bìa Cứng Lined Journal Notion Style", "category": "Văn Phòng Phẩm", "price": 65000, "originalPrice": 85000, "image": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80", "description": "Sổ tay ghi chép bìa cứng chất lượng cao, chống lem mực." },
+                { "id": "p_106", "slug": "sp-106", "name": "Túi Tote Vải Canvas Họa Tiết Sáng Tạo", "category": "Thời Trang", "price": 95000, "originalPrice": 130000, "image": "https://images.unsplash.com/photo-1597484661643-2f5fef640dd1?auto=format&fit=crop&w=600&q=80", "description": "Túi tote vải thô canvas dày dặn, quai đeo chắc chắn." },
+                { "id": "p_107", "slug": "sp-107", "name": "Bộ Thiệp Cảm Ơn Handmade Kèm Phong Bì Pastel", "category": "Quà Tặng", "price": 45000, "originalPrice": 60000, "image": "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=600&q=80", "description": "Set 5 thiệp chúc mừng thiết kế tối giản tinh tế." },
+                { "id": "p_108", "slug": "sp-108", "name": "Bình Nước Thủy Tinh Bọc Silico Pastel", "category": "Gia Dụng", "price": 115000, "originalPrice": 140000, "image": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=600&q=80", "description": "Bình nước chịu nhiệt 500ml bọc vỏ silicon chống va đập." },
+                { "id": "p_109", "slug": "sp-109", "name": "Móc Khóa Hoa Len Handmade Tông Xanh Mint", "category": "Phụ Kiện", "price": 35000, "originalPrice": 50000, "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80", "description": "Móc khóa đan len thủ công tỉ mỉ, hình bông hoa dễ thương." },
+                { "id": "p_110", "slug": "sp-110", "name": "Đèn Ngủ Cầu Vồng LED Mini Cute", "category": "Trang Trí", "price": 135000, "originalPrice": 175000, "image": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=600&q=80", "description": "Đèn trang trí bàn học/bàn làm việc ánh sáng dịu nhẹ." }
+            ]
+        };
+
+        let products = [];
+        let currentCategory = 'Tất cả';
+        let isAdminLoggedIn = false;
+        let adminPassword = '1234';
+        
+        let storeName = 'CM CLOW';
+        let storeTagline = 'Không có ý tưởng nào quá nhỏ để trở thành điều tuyệt vời !';
+        let storeDomain = 'CmClow.com';
+        let instagramUrl = 'https://www.instagram.com/cmclow.infor?stkn=ZWo4Z2JqdDA2MTI0';
+        let threadsUrl = 'https://www.threads.com/@cmclow.infor';
+        let storeLogo = '';
+        let currentThemeKey = 'mint';
+
+        let brandStory = {
+            title: 'Gửi Gắm Yêu Thương Vào Từng Sản Phẩm',
+            content: 'Chào mừng bạn ghé thăm tiệm nhỏ của chúng mình! Tại đây mọi sản phẩm đều được tuyển chọn cẩn thận nhất.',
+            image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80'
+        };
+
+        let tempBase64Images = { prod: '', story: '', logo: '' };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+            applyTheme(currentThemeKey);
+            initLucide();
+            bindSearchEvents();
+            renderCategoryFilters();
+            renderProducts();
+            renderThemePicker();
+            updateStoreUI();
+        });
+
+        function initLucide() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function loadFromStorage() {
+            const savedProducts = localStorage.getItem('pastel_products');
+            const savedPass = localStorage.getItem('pastel_admin_pass');
+            const savedName = localStorage.getItem('pastel_store_name');
+            const savedTagline = localStorage.getItem('pastel_store_tagline');
+            const savedDomain = localStorage.getItem('pastel_store_domain');
+            const savedInsta = localStorage.getItem('pastel_instagram_url');
+            const savedThreads = localStorage.getItem('pastel_threads_url');
+            const savedLogo = localStorage.getItem('pastel_store_logo');
+            const savedTheme = localStorage.getItem('pastel_store_theme');
+            const savedStory = localStorage.getItem('pastel_brand_story');
+
+            if (!savedProducts && INTEGRATED_BACKUP_DATA) {
+                applyFullStoreImport(INTEGRATED_BACKUP_DATA);
+                return;
+            }
+
+            products = savedProducts ? JSON.parse(savedProducts) : INTEGRATED_BACKUP_DATA.products;
+            if (savedPass) adminPassword = savedPass;
+            if (savedName) storeName = savedName;
+            if (savedTagline) storeTagline = savedTagline;
+            if (savedDomain) storeDomain = savedDomain;
+            if (savedInsta) instagramUrl = savedInsta;
+            if (savedThreads) threadsUrl = savedThreads;
+            if (savedLogo) storeLogo = savedLogo;
+            if (savedTheme && ALL_THEMES[savedTheme]) currentThemeKey = savedTheme;
+            if (savedStory) brandStory = JSON.parse(savedStory);
+        }
+
+        function saveProductsToStorage() {
+            try {
+                localStorage.setItem('pastel_products', JSON.stringify(products));
+            } catch (e) {
+                showToast('Bộ nhớ trình duyệt đầy! Hãy dùng Link Ảnh thay vì tải tệp từ máy.', 'error');
+            }
+        }
+
+        function getFullStoreExportData() {
+            return {
+                version: "2.0",
+                timestamp: new Date().toISOString(),
+                storeName, storeTagline, storeDomain, instagramUrl, threadsUrl, storeLogo, adminPassword, currentThemeKey, brandStory, products
+            };
+        }
+
+        function copyBackupCode() {
+            try {
+                const data = getFullStoreExportData();
+                const jsonStr = JSON.stringify(data);
+                const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+                
+                const textarea = document.createElement('textarea');
+                textarea.value = encoded;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+
+                showToast('Đã sao chép Mã dữ liệu shop vào khay nhớ tạm!', 'success');
+            } catch (err) {
+                showToast('Lỗi khi sao chép mã!', 'error');
+            }
+        }
+
+        function downloadJsonBackup() {
+            const data = getFullStoreExportData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${storeDomain.replace(/[^a-z0-9]/gi, '_')}_backup.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Tải về file JSON sao lưu thành công!', 'success');
+        }
+
+        function restoreFromCode() {
+            const input = document.getElementById('restoreCodeInput').value.trim();
+            if (!input) {
+                showToast('Vui lòng dán mã sao lưu vào!', 'error');
+                return;
+            }
+
+            try {
+                let parsedData = null;
+                if (input.startsWith('{')) {
+                    parsedData = JSON.parse(input);
+                } else {
+                    const decodedStr = decodeURIComponent(escape(atob(input)));
+                    parsedData = JSON.parse(decodedStr);
+                }
+
+                if (parsedData && parsedData.products) {
+                    applyFullStoreImport(parsedData);
+                    closeBackupModal();
+                    showToast('Khôi phục toàn bộ shop thành công!', 'success');
+                } else {
+                    throw new Error("Invalid");
+                }
+            } catch (err) {
+                showToast('Mã khôi phục không hợp lệ!', 'error');
+            }
+        }
+
+        function uploadJsonBackup(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const parsed = JSON.parse(evt.target.result);
+                    if (parsed && parsed.products) {
+                        applyFullStoreImport(parsed);
+                        closeBackupModal();
+                        showToast('Khôi phục từ file JSON thành công!', 'success');
+                    }
+                } catch(err) {
+                    showToast('Lỗi đọc file JSON', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function applyFullStoreImport(data) {
+            if (data.storeName) { storeName = data.storeName; localStorage.setItem('pastel_store_name', storeName); }
+            if (data.storeTagline) { storeTagline = data.storeTagline; localStorage.setItem('pastel_store_tagline', storeTagline); }
+            if (data.storeDomain) { storeDomain = data.storeDomain; localStorage.setItem('pastel_store_domain', storeDomain); }
+            if (data.instagramUrl) { instagramUrl = data.instagramUrl; localStorage.setItem('pastel_instagram_url', instagramUrl); }
+            if (data.threadsUrl) { threadsUrl = data.threadsUrl; localStorage.setItem('pastel_threads_url', threadsUrl); }
+            if (data.storeLogo !== undefined) { storeLogo = data.storeLogo; localStorage.setItem('pastel_store_logo', storeLogo); }
+            if (data.adminPassword) { adminPassword = data.adminPassword; localStorage.setItem('pastel_admin_pass', adminPassword); }
+            if (data.currentThemeKey) { currentThemeKey = data.currentThemeKey; applyTheme(currentThemeKey); }
+            if (data.brandStory) { brandStory = data.brandStory; localStorage.setItem('pastel_brand_story', JSON.stringify(brandStory)); }
+            if (data.products) { products = data.products; saveProductsToStorage(); }
+
+            updateStoreUI();
+            renderCategoryFilters();
+            renderProducts();
+        }
+
+        function openBackupModal() {
+            document.getElementById('restoreCodeInput').value = '';
+            document.getElementById('backupModal').classList.remove('hidden');
+        }
+        function closeBackupModal() { document.getElementById('backupModal').classList.add('hidden'); }
+
+        // --- THEMES & THEME PICKER ---
+        function applyTheme(key) {
+            const theme = ALL_THEMES[key] || ALL_THEMES.mint;
+            currentThemeKey = key;
+            localStorage.setItem('pastel_store_theme', key);
+
+            document.documentElement.style.setProperty('--theme-primary', theme.primary);
+            document.documentElement.style.setProperty('--theme-primary-hover', theme.hover);
+            document.documentElement.style.setProperty('--theme-primary-light', theme.light);
+            document.documentElement.style.setProperty('--theme-primary-text', theme.text);
+            document.documentElement.style.setProperty('--theme-bg', theme.bg);
+            
+            const badge = document.getElementById('activeThemeBadgeName');
+            if (badge) badge.textContent = theme.name;
+
+            renderThemePicker();
+        }
+
+        function renderThemePicker() {
+            const pastelContainer = document.getElementById('pastelThemePickerContainer');
+            const eventContainer = document.getElementById('eventThemePickerContainer');
+            if (!pastelContainer || !eventContainer) return;
+
+            pastelContainer.innerHTML = Object.keys(ALL_THEMES)
+                .filter(k => ALL_THEMES[k].group === 'pastel')
+                .map(key => {
+                    const t = ALL_THEMES[key];
+                    const isSelected = key === currentThemeKey;
+                    return `
+                        <button type="button" onclick="applyTheme('${key}')" title="${t.name}"
+                                style="background-color: ${t.colorCode}"
+                                class="h-10 rounded-xl border-2 ${isSelected ? 'border-stone-800 ring-2 ring-stone-800/20 scale-105 shadow-md' : 'border-stone-200/60 hover:scale-102'} transition-all flex items-center justify-center">
+                            ${isSelected ? '<i data-lucide="check" class="w-4 h-4 text-stone-800"></i>' : ''}
+                        </button>
+                    `;
+                }).join('');
+
+            eventContainer.innerHTML = Object.keys(ALL_THEMES)
+                .filter(k => ALL_THEMES[k].group === 'event')
+                .map(key => {
+                    const t = ALL_THEMES[key];
+                    const isSelected = key === currentThemeKey;
+                    return `
+                        <button type="button" onclick="applyTheme('${key}')"
+                                class="p-2 rounded-xl border-2 text-left flex items-center gap-2 transition-all ${isSelected ? 'border-stone-800 bg-stone-100/90 shadow-sm font-bold' : 'border-stone-200/70 hover:bg-stone-50 text-stone-600'}">
+                            <span class="w-4 h-4 rounded-full flex-shrink-0" style="background-color: ${t.colorCode}"></span>
+                            <span class="text-[11px] truncate flex-grow">${t.name}</span>
+                            ${isSelected ? '<i data-lucide="check" class="w-3.5 h-3.5 text-stone-800 flex-shrink-0"></i>' : ''}
+                        </button>
+                    `;
+                }).join('');
+
+            initLucide();
+        }
+
+        function updateStoreUI() {
+            document.getElementById('headerStoreName').textContent = storeName;
+            document.getElementById('headerStoreTagline').textContent = storeTagline;
+            document.getElementById('shortLinkDomainPrefix').textContent = storeDomain + '/';
+
+            document.getElementById('instagramLinkBadge').href = instagramUrl || '#';
+            document.getElementById('threadsLinkBadge').href = threadsUrl || '#';
+
+            const logoImg = document.getElementById('shopLogoImg');
+            const logoFallback = document.getElementById('shopLogoFallback');
+            if (storeLogo) {
+                logoImg.src = storeLogo;
+                logoImg.classList.remove('hidden');
+                logoFallback.classList.add('hidden');
+            } else {
+                logoImg.classList.add('hidden');
+                logoFallback.classList.remove('hidden');
+            }
+
+            document.getElementById('storyTitle').textContent = brandStory.title;
+            document.getElementById('storyContent').textContent = brandStory.content;
+            document.getElementById('storyImg').src = brandStory.image || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80';
+            
+            initLucide();
+        }
+
+        // --- AUTH ---
+        function onLogoClick() {
+            if (isAdminLoggedIn) {
+                openSettingsModal();
+            } else {
+                document.getElementById('adminPasswordInput').value = '';
+                document.getElementById('authModal').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('adminPasswordInput').focus();
+                }, 100);
+            }
+        }
+
+        function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+
+        function submitAdminAuth(e) {
+            e.preventDefault();
+            const inputPass = document.getElementById('adminPasswordInput').value;
+
+            if (inputPass === adminPassword) {
+                isAdminLoggedIn = true;
+                closeAuthModal();
+                toggleAdminUI(true);
+                showToast('Đã mở Chế độ Chủ Shop!', 'success');
+            } else {
+                showToast('Mã xác thực không chính xác!', 'error');
+                document.getElementById('adminPasswordInput').value = '';
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            toggleAdminUI(false);
+            showToast('Đã thoát Chế độ Chủ Shop', 'info');
+        }
+
+        function toggleAdminUI(enable) {
+            const elements = ['adminBadge', 'logoutAdminBtn', 'editStoryBtn', 'adminControlBar'];
+            elements.forEach(id => {
+                const el = document.getElementById(id);
+                if (enable) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+
+            renderProducts();
+        }
+
+        // --- PRODUCTS DISPLAY ---
+        function getFilteredProducts() {
+            const searchQuery = (document.getElementById('headerSearchInput').value || document.getElementById('mobileSearchInput').value || '').toLowerCase();
+            const sortBy = document.getElementById('sortSelect').value;
+
+            let filtered = products.filter(p => {
+                const matchesCategory = (currentCategory === "Tất cả") || (p.category === currentCategory);
+                const matchesSearch = p.name.toLowerCase().includes(searchQuery) || (p.description && p.description.toLowerCase().includes(searchQuery)) || (p.slug && p.slug.toLowerCase().includes(searchQuery));
+                return matchesCategory && matchesSearch;
+            });
+
+            if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
+            if (sortBy === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+            if (sortBy === 'name-asc') filtered.sort((a, b) => a.name.localeCompare(b.name));
+
+            return filtered;
+        }
+
+        function renderCategoryFilters() {
+            const categories = ["Tất cả", ...new Set(products.map(p => p.category))];
+            const container = document.getElementById('categoryFilterContainer');
+            
+            container.innerHTML = categories.map(cat => {
+                const active = cat === currentCategory;
+                const activeClass = active 
+                    ? 'bg-theme-primary text-white shadow-sm font-bold' 
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200/70 font-semibold';
+                return `<button onclick="setCategory('${cat}')" class="px-3.5 py-1.5 rounded-xl text-xs whitespace-nowrap transition ${activeClass}">${cat}</button>`;
+            }).join('');
+
+            document.getElementById('categorySuggestions').innerHTML = categories.filter(c => c !== "Tất cả").map(c => `<option value="${c}">`).join('');
+        }
+
+        function setCategory(cat) {
+            currentCategory = cat;
+            renderCategoryFilters();
+            renderProducts();
+        }
+
+        function bindSearchEvents() {
+            const hSearch = document.getElementById('headerSearchInput');
+            const mSearch = document.getElementById('mobileSearchInput');
+
+            const handleInput = (e) => {
+                if (e.target === hSearch) mSearch.value = e.target.value;
+                if (e.target === mSearch) hSearch.value = e.target.value;
+                renderProducts();
+            };
+
+            hSearch.addEventListener('input', handleInput);
+            mSearch.addEventListener('input', handleInput);
+        }
+
+        function formatMoney(val) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            const empty = document.getElementById('emptyState');
+            const items = getFilteredProducts();
+
+            if (items.length === 0) {
+                grid.innerHTML = '';
+                empty.classList.remove('hidden');
+                empty.classList.add('flex');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            empty.classList.remove('flex');
+
+            grid.innerHTML = items.map(p => {
+                return `
+                <div class="bg-white rounded-3xl border border-stone-200/70 shadow-sm overflow-hidden hover:shadow-md transition duration-300 group flex flex-col justify-between relative">
+                    
+                    ${isAdminLoggedIn ? `
+                        <div class="absolute top-3 right-3 z-10 flex gap-1 bg-white/90 backdrop-blur-md p-1 rounded-xl shadow-md border border-stone-200/50">
+                            <button onclick="openProductModal('${p.id}')" class="p-1.5 text-stone-600 hover:text-indigo-600 rounded-lg transition" title="Sửa">
+                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="deleteProduct('${p.id}')" class="p-1.5 text-stone-600 hover:text-rose-600 rounded-lg transition" title="Xóa">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    ` : ''}
+
+                    <div>
+                        <div class="relative aspect-square bg-stone-100 overflow-hidden cursor-pointer" onclick="openDetailModal('${p.id}')">
+                            <img src="${p.image || 'https://placehold.co/400x400'}" 
+                                 alt="${p.name}"
+                                 onerror="this.src='https://placehold.co/400x400?text=Lỗi+Ảnh'"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-stone-700 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm border border-stone-200/40">
+                                ${p.category}
+                            </span>
+                        </div>
+
+                        <div class="p-4">
+                            <h3 onclick="openDetailModal('${p.id}')" class="font-bold text-stone-800 text-sm sm:text-base line-clamp-2 cursor-pointer hover:text-stone-600 transition">
+                                ${p.name}
+                            </h3>
+                            <p class="text-xs text-stone-500 mt-1 line-clamp-2 leading-relaxed">${p.description || 'Chưa có mô tả.'}</p>
+                        </div>
+                    </div>
+
+                    <div class="px-4 pb-4 pt-2 flex items-center justify-between border-t border-stone-100">
+                        <div>
+                            <span class="text-[10px] text-stone-400 font-semibold block">Giá bán</span>
+                            <div class="flex items-baseline gap-1.5">
+                                <span class="font-extrabold text-stone-800 text-base">${formatMoney(p.price)}</span>
+                                ${p.originalPrice > p.price ? `<span class="text-[10px] text-stone-400 line-through">${formatMoney(p.originalPrice)}</span>` : ''}
+                            </div>
+                        </div>
+                        <button onclick="openDetailModal('${p.id}')" class="p-2.5 rounded-2xl bg-theme-light text-stone-700 hover:bg-stone-200 transition">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `}).join('');
+
+            initLucide();
+        }
+
+        // --- PRODUCT DETAILS ---
+        function openDetailModal(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            document.getElementById('detailTitle').textContent = product.name;
+            document.getElementById('detailCategory').textContent = product.category;
+            document.getElementById('detailPrice').textContent = formatMoney(product.price);
+
+            const origPriceEl = document.getElementById('detailOriginalPrice');
+            if (product.originalPrice && product.originalPrice > product.price) {
+                origPriceEl.textContent = formatMoney(product.originalPrice);
+                origPriceEl.classList.remove('hidden');
+            } else {
+                origPriceEl.classList.add('hidden');
+            }
+
+            document.getElementById('detailDesc').textContent = product.description || 'Chưa có mô tả chi tiết.';
+            
+            const imgEl = document.getElementById('detailImg');
+            imgEl.src = product.image || 'https://placehold.co/400x400';
+            imgEl.onerror = () => { imgEl.src = 'https://placehold.co/400x400?text=Lỗi+Ảnh'; };
+
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() { document.getElementById('detailModal').classList.add('hidden'); }
+
+        function openSocialLink(platform) {
+            closeDetailModal();
+            const targetUrl = platform === 'instagram' ? instagramUrl : threadsUrl;
+            if (targetUrl) {
+                window.open(targetUrl, '_blank');
+            } else {
+                showToast(`Chủ shop chưa thiết lập liên kết ${platform}`, 'error');
+            }
+        }
+
+        // --- EDITING / MODALS ---
+        function openProductModal(editId = null) {
+            const form = document.getElementById('productForm');
+            form.reset();
+            tempBase64Images.prod = '';
+            switchImageTab('url');
+
+            if (editId) {
+                const p = products.find(prod => prod.id === editId);
+                if (!p) return;
+
+                document.getElementById('productModalTitle').textContent = 'Chỉnh Sửa Sản Phẩm';
+                document.getElementById('productId').value = p.id;
+                document.getElementById('prodName').value = p.name;
+                document.getElementById('prodSlug').value = p.slug || p.id;
+                document.getElementById('prodCategory').value = p.category;
+                document.getElementById('prodPrice').value = p.price;
+                document.getElementById('prodOriginalPrice').value = p.originalPrice || '';
+                document.getElementById('prodImgUrl').value = p.image;
+                document.getElementById('prodDescription').value = p.description || '';
+                updateImagePreview(p.image);
+            } else {
+                document.getElementById('productModalTitle').textContent = 'Thêm Sản Phẩm Mới';
+                document.getElementById('productId').value = '';
+                document.getElementById('prodSlug').value = 'sp-' + Math.floor(100 + Math.random() * 900);
+                updateImagePreview('');
+            }
+
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function closeProductModal() { document.getElementById('productModal').classList.add('hidden'); }
+
+        function switchImageTab(tab) {
+            const urlBtn = document.getElementById('imgTabUrlBtn');
+            const fileBtn = document.getElementById('imgTabFileBtn');
+            const urlBox = document.getElementById('imgUrlBox');
+            const fileBox = document.getElementById('imgFileBox');
+
+            if (tab === 'url') {
+                urlBtn.className = 'px-3 py-1 text-xs rounded-lg bg-stone-200 text-stone-800 font-bold';
+                fileBtn.className = 'px-3 py-1 text-xs rounded-lg bg-stone-100 text-stone-600 font-bold';
+                urlBox.classList.remove('hidden');
+                fileBox.classList.add('hidden');
+            } else {
+                fileBtn.className = 'px-3 py-1 text-xs rounded-lg bg-stone-200 text-stone-800 font-bold';
+                urlBtn.className = 'px-3 py-1 text-xs rounded-lg bg-stone-100 text-stone-600 font-bold';
+                fileBox.classList.remove('hidden');
+                urlBox.classList.add('hidden');
+            }
+        }
+
+        // HÀM XỬ LÝ & NÉN ẢNH TỰ ĐỘNG ĐỂ KHÔNG BỊ ĐẦY BỘ NHỚ LOCALSTORAGE
+        function handleFileUpload(e, targetKey) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    // Resize chiều rộng tối đa 450px (đủ nét cho hiển thị thẻ sản phẩm)
+                    const maxWidth = 450;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Nén chất lượng ảnh JPEG xuống 0.65 để giảm dung lượng file tối đa
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.65);
+
+                    tempBase64Images[targetKey] = compressedBase64;
+                    if (targetKey === 'prod') updateImagePreview(compressedBase64);
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateImagePreview(url) {
+            const preview = document.getElementById('imgPreview');
+            const icon = document.getElementById('imgPlaceholderIcon');
+
+            if (url) {
+                preview.src = url;
+                preview.classList.remove('hidden');
+                icon.classList.add('hidden');
+            } else {
+                preview.src = '';
+                preview.classList.add('hidden');
+                icon.classList.remove('hidden');
+            }
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('productId').value;
+            const name = document.getElementById('prodName').value.trim();
+            const slug = document.getElementById('prodSlug').value.trim().toLowerCase().replace(/\s+/g, '-');
+            const category = document.getElementById('prodCategory').value.trim();
+            const price = parseFloat(document.getElementById('prodPrice').value);
+            const originalPrice = parseFloat(document.getElementById('prodOriginalPrice').value) || 0;
+            const description = document.getElementById('prodDescription').value.trim();
+            
+            let image = tempBase64Images.prod || document.getElementById('prodImgUrl').value.trim();
+            if (!image) image = 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=600&q=80';
+
+            if (id) {
+                const index = products.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    products[index] = { id, slug, name, category, price, originalPrice, image, description };
+                    showToast('Đã cập nhật sản phẩm!', 'success');
+                }
+            } else {
+                const newProduct = {
+                    id: 'p_' + Date.now(),
+                    slug: slug || ('sp-' + Date.now()),
+                    name,
+                    category,
+                    price,
+                    originalPrice,
+                    image,
+                    description
+                };
+                products.unshift(newProduct);
+                showToast('Thêm sản phẩm thành công!', 'success');
+            }
+
+            saveProductsToStorage();
+            closeProductModal();
+            renderCategoryFilters();
+            renderProducts();
+        }
+
+        function deleteProduct(id) {
+            if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+                products = products.filter(p => p.id !== id);
+                saveProductsToStorage();
+                renderCategoryFilters();
+                renderProducts();
+                showToast('Đã xóa sản phẩm!', 'info');
+            }
+        }
+
+        function openStoryModal() {
+            document.getElementById('editStoryTitle').value = brandStory.title;
+            document.getElementById('editStoryContent').value = brandStory.content;
+            document.getElementById('editStoryImgUrl').value = brandStory.image;
+            tempBase64Images.story = '';
+            document.getElementById('storyModal').classList.remove('hidden');
+        }
+
+        function closeStoryModal() { document.getElementById('storyModal').classList.add('hidden'); }
+
+        function saveStory(e) {
+            e.preventDefault();
+            brandStory.title = document.getElementById('editStoryTitle').value.trim();
+            brandStory.content = document.getElementById('editStoryContent').value.trim();
+            
+            const urlInput = document.getElementById('editStoryImgUrl').value.trim();
+            if (tempBase64Images.story) {
+                brandStory.image = tempBase64Images.story;
+            } else if (urlInput) {
+                brandStory.image = urlInput;
+            }
+
+            localStorage.setItem('pastel_brand_story', JSON.stringify(brandStory));
+            updateStoreUI();
+            closeStoryModal();
+            showToast('Đã lưu câu chuyện thương hiệu!', 'success');
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settingsStoreName').value = storeName;
+            document.getElementById('settingsStoreTagline').value = storeTagline;
+            document.getElementById('settingsStoreDomain').value = storeDomain;
+            document.getElementById('settingsInstagramUrl').value = instagramUrl;
+            document.getElementById('settingsThreadsUrl').value = threadsUrl;
+            document.getElementById('settingsLogoUrl').value = storeLogo;
+            document.getElementById('settingsPassword').value = '';
+            tempBase64Images.logo = '';
+            renderThemePicker();
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() { document.getElementById('settingsModal').classList.add('hidden'); }
+
+        function saveSettings(e) {
+            e.preventDefault();
+            const newName = document.getElementById('settingsStoreName').value.trim();
+            const newTagline = document.getElementById('settingsStoreTagline').value.trim();
+            const newDomain = document.getElementById('settingsStoreDomain').value.trim();
+            const newInsta = document.getElementById('settingsInstagramUrl').value.trim();
+            const newThreads = document.getElementById('settingsThreadsUrl').value.trim();
+            const newPass = document.getElementById('settingsPassword').value.trim();
+            const logoUrlInput = document.getElementById('settingsLogoUrl').value.trim();
+
+            if (newName) { storeName = newName; localStorage.setItem('pastel_store_name', storeName); }
+            if (newTagline) { storeTagline = newTagline; localStorage.setItem('pastel_store_tagline', storeTagline); }
+            if (newDomain) { storeDomain = newDomain; localStorage.setItem('pastel_store_domain', storeDomain); }
+            
+            instagramUrl = newInsta; localStorage.setItem('pastel_instagram_url', instagramUrl);
+            threadsUrl = newThreads; localStorage.setItem('pastel_threads_url', threadsUrl);
+
+            if (tempBase64Images.logo) {
+                storeLogo = tempBase64Images.logo;
+                localStorage.setItem('pastel_store_logo', storeLogo);
+            } else if (logoUrlInput !== undefined) {
+                storeLogo = logoUrlInput;
+                localStorage.setItem('pastel_store_logo', storeLogo);
+            }
+
+            if (newPass) {
+                adminPassword = newPass;
+                localStorage.setItem('pastel_admin_pass', adminPassword);
+                showToast('Đã cập nhật mật khẩu chủ shop!', 'success');
+            }
+
+            updateStoreUI();
+            renderProducts();
+            closeSettingsModal();
+            showToast('Đã lưu toàn bộ cài đặt shop!', 'success');
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const bg = type === 'success' ? 'bg-emerald-700 text-white' : type === 'error' ? 'bg-rose-700 text-white' : 'bg-stone-800 text-white';
+
+            toast.className = `${bg} text-xs font-bold px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2 transform transition duration-300 translate-y-2 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info'}" class="w-4 h-4"></i>
+                <span>${msg}</span>
+            `;
+
+            container.appendChild(toast);
+            initLucide();
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
